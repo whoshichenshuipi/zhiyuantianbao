@@ -1,0 +1,19 @@
+{% raw %}
+Jinja2 有三种定界符语法：
+{{ ... }} 用来标记变量；
+{% ... %} 用来标记语句；
+{# ... #} 用来标记注释；
+如果你同时使用了 JavaScript 模板引擎，而该 JavaScript 模板引擎也使用相同的语法标记符，那就会产生冲突。一般来说，有下面三种兼容性处理方式：
+1. 使用 Jinja2 的 raw 标签标记 JavaScript 模板代码
+第一种方式最直观，使用 Jinja2 的 raw 标签声明原生代码块，也就是不需要进行后端渲染的代码块。使用 raw 和 endraw 标签把 JavaScript 模板部分标记出来即可
+2. 修改 Jinja2 的语法定界符号
+第二种方式是修改 Jinja2 的语法定界符号，一般只修改变量定界符即可，其他的按需修改。具体通过修改程序实例的下面几个属性来实现
+app.jinja_env.block_start_string = '(%'  # 修改块开始符号
+app.jinja_env.block_end_string = '%)'  # 修改块结束符号
+app.jinja_env.variable_start_string = '(('  # 修改变量开始符号
+app.jinja_env.variable_end_string = '))'  # 修改变量结束符号
+app.jinja_env.comment_start_string = '(#'  # 修改注释开始符号
+app.jinja_env.comment_end_string = '#)'  # 修改注释结束符号
+3. 修改 JavaScript 模板的语法定界符号
+第三种方式是修改 JavaScript 模板的语法定界符号，具体方法因 JavaScript 模板/框架而异，可以参见相关文档了解
+{% endraw %}

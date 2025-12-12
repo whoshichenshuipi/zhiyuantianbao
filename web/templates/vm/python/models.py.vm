@@ -1,0 +1,48 @@
+from app import db
+from ..common.BaseModel import BaseModel
+
+
+# {{functionName}}对象 {{tableName}}
+# @author {{author}}
+# @date {{datetime}}
+class {{ClassName}}(BaseModel):
+    __tablename__ = '{{ tableName }}'
+    __table_args__ = ({'comment': '{{ tableComment }}'})
+    {% for column in columns %}
+        {% if not column.superColumn %}
+            {% if column.javaType == 'String' %}
+                {% if column.columnType.startswith("char") %}
+                    {% set columnType = column.columnType.replace('char','CHAR') %}
+                {% else %}
+                    {% set columnType = column.columnType.replace(column.columnType.split('(')[0],'String') %}
+                {% endif %}
+            {% elif column.javaType == 'Date' %}
+                {% set columnType = 'DATETIME' %}
+            {% elif column.javaType == 'BigDecimal' %}
+                {% set columnType = column.columnType.replace(column.columnType.split('(')[0],'Numeric') %}
+            {% elif column.javaType == 'Integer' %}
+                {% set columnType = 'Integer' %}
+            {% elif column.javaType == 'Long' %}
+                {% if column.columnType == "int" %}
+                    {% set columnType = 'Integer' %}
+                {% elif column.columnType == "bigint" %}
+                    {% set columnType = 'BigInteger' %}
+                {% else %}
+                    {% set columnType = 'Float' %}
+                {% endif %}
+            {% else %}
+                {% set columnType = 'String' %}
+            {% endif %}
+            {% if column.pk %}
+                {% set primary_key = 'primary_key=True, ' %}
+            {% else %}
+                {% set primary_key = '' %}
+            {% endif %}
+            {% if column.increment %}
+                {% set autoincrement = 'autoincrement=True, ' %}
+            {% else %}
+                {% set autoincrement = '' %}
+            {% endif %}
+    {{ column.columnName }} = db.Column(db.{{columnType}}, {{primary_key}}{{autoincrement}}comment='{{column.columnComment}}')
+        {% endif %}
+    {% endfor %}

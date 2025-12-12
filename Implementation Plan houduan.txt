@@ -1,0 +1,44 @@
+Implementation Plan (Backend Development - Houduan)
+
+1. 框架适配与角色扩展
+   - 在 sys_role 表新增 student、college 角色
+   - 配置对应菜单权限 (sys_role_menu)
+   - 在 permission 装饰器加入角色校验
+
+2. 数据库表设计
+   - 新增业务表: t_examiner_info, t_college_major, t_volunteer_plan, t_admission_data, t_admission_probability, t_community_content, t_news_policy, t_feedback_complaint, t_customer_service, t_college_info, t_college_student_source
+   - 所有表遵循 RuoYi-Flask 通用字段 (id, create_by, create_time, update_by, update_time, del_flag)
+   - 编写对应的 SQL 建表语句并执行迁移
+
+3. 模型层
+   - 为每个新表在 web/models 创建 SQLAlchemy 模型，继承 BaseModel
+   - 示例: class ExaminerInfo(BaseModel): __tablename__ = 't_examiner_info' ...
+
+4. 控制器层 (Blueprint)
+   - 为考生/家长、招生高校、管理员分别创建 Blueprint
+   - 实现 CRUD 接口，遵循返回格式 {"code":0,"msg":"成功","data":...}
+   - 加入分页、权限校验、异常统一处理
+
+5. 服务层
+   - 实现业务逻辑: 志愿推荐、录取概率计算、智能客服、批量导入等
+   - 在 web/service 中编写相应函数，供控制器调用
+
+6. 权限与 RBAC
+   - 在 sys_role_menu 中关联新角色的菜单路径 (/student/**, /college/**)
+   - 在 web/decorator/permission.py 添加 @requires_roles 辅助检查
+
+7. 文件上传
+   - 使用 flask_uploads 实现图片/附件上传，路径保存至对应表字段
+
+8. 日志审计
+   - 在业务增删改操作中调用 log_operation 写入 sys_oper_log
+
+9. 单元测试与接口文档
+   - 使用 pytest 编写模型、服务层测试
+   - 使用 flasgger 生成 Swagger 文档
+
+10. 验证计划
+   - 自动化测试: 模型 CRUD、接口返回、权限控制
+   - 手动验证: 启动后端，使用前端 Mock 数据走通所有业务流程
+
+先完成数据库表创建、模型、控制器、服务层的基础实现，后续再完善前端真实数据对接。

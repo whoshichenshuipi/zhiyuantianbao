@@ -1,0 +1,117 @@
+from datetime import datetime
+
+from flask_login import current_user, login_required
+from web.routes import main_routes
+from web.models import SysConfig
+from flask import request, jsonify
+from web import db, cache
+import flask_excel as excel
+from web.decorator import permission, dataScope
+
+
+# {{functionName}}对象 {{tableName}}
+# @author {{author}}
+# @date {{datetime}}
+
+
+@main_routes.route('/{{moduleName}}/{{businessName}}/list', methods=['GET'])
+@login_required
+@permission('{{moduleName}}:{{businessName}}:list')
+@dataScope('{{tableName}}.create_by')
+def {{moduleName}}_{{businessName}}_list(filters=[]):
+    {% for column in columns %}
+        {% if column.query %}
+            {% if  column.queryType == "BETWEEN"  %}
+    if 'params[{{beginTime}}]' in request.args and 'params[endTime]' in request.args:
+            {% else  %}
+    if '{{column.javaField}}' in request.args:
+            {% endif %}
+            {% if column.queryType == "LIKE" %}
+        filters.append({{ClassName}}.{{column.columnName}}.like('%' + request.args['{{column.javaField}}'] + '%'))
+            {% elif  column.queryType == "EQ"  %}
+        filters.append({{ClassName}}.{{column.columnName}} == request.args['{{column.javaField}}'])
+            {% elif  column.queryType == "NE"  %}
+        filters.append({{ClassName}}.{{column.columnName}} != request.args['{{column.javaField}}'])
+            {% elif  column.queryType == "GT"  %}
+        filters.append({{ClassName}}.{{column.columnName}} > request.args['{{column.javaField}}'])
+            {% elif  column.queryType == "GTE"  %}
+        filters.append({{ClassName}}.{{column.columnName}} >= request.args['{{column.javaField}}'])
+            {% elif  column.queryType == "LT"  %}
+        filters.append({{ClassName}}.{{column.columnName}} < request.args['{{column.javaField}}'])
+            {% elif  column.queryType == "LTE"  %}
+        filters.append({{ClassName}}.{{column.columnName}} <= request.args['{{column.javaField}}'])
+            {% elif  column.queryType == "BETWEEN"  %}
+        filters.append({{ClassName}}.{{column.columnName}} >  request.args['params[beginTime]'])
+        filters.append({{ClassName}}.{{column.columnName}} <  request.args['params[endTime]'])
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+    page = request.args.get('pageNum', 1, type=int)
+    rows = request.args.get('pageSize', 10, type=int)
+    pagination = {{ClassName}}.query.filter(*filters).paginate(page=page, per_page=rows, error_out=False)
+    {{businessName}}_list = pagination.items
+    return jsonify({'msg': '操作成功', 'code': 200, 'rows': [{{businessName}}.to_json() for {{businessName}} in {{businessName}}_list], 'total': pagination.total})
+
+
+@main_routes.route('/{{moduleName}}/{{businessName}}/<{{pkColumn.columnName}}>', methods=['GET'])
+@login_required
+@permission('{{moduleName}}:{{businessName}}:query')
+def {{moduleName}}_{{businessName}}_get_info({{pkColumn.columnName}}):
+    {{businessName}} = {{ClassName}}.query.get({{pkColumn.columnName}})
+    return jsonify({'msg': '操作成功', 'code': 200, 'data': {{businessName}}.to_json()})
+
+
+@main_routes.route('/{{moduleName}}/{{businessName}}', methods=['POST'])
+@login_required
+@permission('{{moduleName}}:{{businessName}}:add')
+def {{moduleName}}_{{businessName}}_add():
+    {{businessName}} = {{ClassName}}()
+    {% for column in columns %}
+        {% if not (column.pk or column.columnName in ["create_by", "create_time", "update_by", "update_time"]) %}
+    if '{{column.javaField}}' in request.json: {{businessName}}.{{column.columnName}} = request.json['{{column.javaField}}']
+        {% endif %}
+    {% endfor %}
+    db.session.add({{businessName}})
+    return jsonify({'code': 200, 'msg': '操作成功'})
+
+
+@main_routes.route('/{{moduleName}}/{{businessName}}', methods=['PUT'])
+@login_required
+@permission('{{moduleName}}:{{businessName}}:edit')
+def {{moduleName}}_{{businessName}}_edit():
+    {{businessName}} = {{ClassName}}.query.get(request.json['{{pkColumn.javaField}}'])
+    {% for column in columns %}
+        {% if not (column.pk or column.columnName in ["create_by", "create_time", "update_by", "update_time"]) %}
+    if '{{column.javaField}}' in request.json: {{businessName}}.{{column.columnName}} = request.json['{{column.javaField}}']
+        {% endif %}
+    {% endfor %}
+    db.session.add({{businessName}})
+    return jsonify({'msg': '操作成功', 'code': 200})
+
+
+@main_routes.route('/{{moduleName}}/{{businessName}}/<string:ids>', methods=['DELETE'])
+@login_required
+@permission('{{moduleName}}:{{businessName}}:remove')
+def {{moduleName}}_{{businessName}}_remove(ids):
+    idList = ids.split(',')
+    for id in idList:
+        {{businessName}} = {{ClassName}}.query.get(id)
+        if {{businessName}}:
+            db.session.delete({{businessName}})
+    return jsonify({'code': 200, 'msg': '操作成功'})
+
+
+@main_routes.route('/{{moduleName}}/{{businessName}}/export', methods=['POST'])
+@login_required
+@permission('{{moduleName}}:{{businessName}}:export')
+def {{moduleName}}_{{businessName}}_export():
+    rows = []
+    rows.append([{% for column in columns %}'{{column.columnComment}}'{% if loop.index!= columns|length %}, {% endif %}{% endfor %}])
+    {{businessName}}s = {{ClassName}}.query.all()
+    for {{businessName}} in {{businessName}}s:
+        row = []
+        {% for column in columns %}
+        row.append({{businessName}}.{{column.columnName}})
+        {% endfor %}
+        rows.append(row)
+    return excel.make_response_from_array(rows, "xlsx", file_name="{{businessName}}")
