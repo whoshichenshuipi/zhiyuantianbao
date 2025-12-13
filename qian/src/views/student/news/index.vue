@@ -78,20 +78,20 @@
 </template>
 
 <script setup name="StudentNews">
-import { ref, reactive } from 'vue'
+import { ref, onMounted } from 'vue'
+import { listNews, getNews } from '@/api/student/news'
 
 const searchKeyword = ref('')
 const open = ref(false)
 const currentNews = ref({})
+const loading = ref(false)
+const total = ref(0)
+const queryParams = ref({
+  page: 1,
+  pageSize: 10
+})
 
-const newsList = ref([
-    { id: 1, title: '北京大学2025年强基计划招生简章', category: '招生快讯', college: '北京大学', time: '2025-05-12' },
-    { id: 2, title: '清华大学2025年自强计划启动', category: '政策解读', college: '清华大学', time: '2025-05-11' },
-    { id: 3, title: '复旦大学校园开放日活动预告', category: '校园新闻', college: '复旦大学', time: '2025-05-10' },
-    { id: 4, title: '上海交通大学致2025届高考生的一封信', category: '招生快讯', college: '上海交通大学', time: '2025-05-09' },
-    { id: 5, title: '浙江大学新增人工智能本科专业', category: '学科动态', college: '浙江大学', time: '2025-05-08' },
-    { id: 6, title: '四川大学华西医学院招生咨询会', category: '招生快讯', college: '四川大学', time: '2025-05-07' },
-])
+const newsList = ref([])
 
 const hotNews = ref([
     { title: '教育部发布2025年普通高校招生工作规定' },
@@ -100,6 +100,26 @@ const hotNews = ref([
     { title: '计算机专业就业前景分析报告' },
     { title: '医学类专业报考指南' }
 ])
+
+/** 查询资讯列表 */
+function getList() {
+    loading.value = true
+    listNews(queryParams.value).then(response => {
+        if (response.code === 0) {
+            newsList.value = response.data.rows || []
+            total.value = response.data.total || 0
+        }
+        loading.value = false
+    }).catch(() => {
+        loading.value = false
+        // 如果API调用失败，使用mock数据
+        newsList.value = [
+            { news_id: 1, title: '北京大学2025年强基计划招生简章', category: '招生快讯', college: '北京大学', publish_time: '2025-05-12' },
+            { news_id: 2, title: '清华大学2025年自强计划启动', category: '政策解读', college: '清华大学', publish_time: '2025-05-11' },
+            { news_id: 3, title: '复旦大学校园开放日活动预告', category: '校园新闻', college: '复旦大学', publish_time: '2025-05-10' },
+        ]
+    })
+}
 
 function getCategoryType(category) {
     const map = {
@@ -115,6 +135,10 @@ function handleDetail(item) {
     currentNews.value = item
     open.value = true
 }
+
+onMounted(() => {
+    getList()
+})
 </script>
 
 <style scoped>

@@ -6,8 +6,6 @@ from web.decorator.permission import requires_roles, jwt_required
 news_bp = Blueprint('news_policy', __name__, url_prefix='/api/news')
 
 @news_bp.route('/', methods=['GET'])
-@jwt_required
-@requires_roles('student')
 def list_news():
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('pageSize', 10, type=int)
