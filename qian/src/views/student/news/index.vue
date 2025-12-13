@@ -16,14 +16,14 @@
           </template>
           
           <div class="news-list">
-             <div v-for="item in newsList" :key="item.id" class="news-item" @click="handleDetail(item)">
+             <div v-for="item in newsList" :key="item.news_id || item.id" class="news-item" @click="handleDetail(item)">
                 <div class="news-title">
                     <el-tag size="small" :type="getCategoryType(item.category)">{{ item.category }}</el-tag>
                     <span class="title-text">{{ item.title }}</span>
                 </div>
                 <div class="news-meta">
-                    <span>{{ item.college }}</span>
-                    <span>{{ item.time }}</span>
+                    <span>{{ item.college || '官方' }}</span>
+                    <span>{{ item.publish_time || item.time }}</span>
                 </div>
              </div>
           </div>

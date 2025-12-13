@@ -123,7 +123,7 @@ import { ref, reactive } from 'vue'
 import { ElMessage } from 'element-plus'
 
 const loading = ref(false)
-const total = ref(total)
+const total = ref(0)
 const open = ref(false)
 const detailTitle = ref("院校详情")
 const currentCollege = ref(null)
