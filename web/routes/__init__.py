@@ -15,7 +15,7 @@ from ..controller import (
     customer_service,
     college_info,
     college_student_source,
-    # existing system controllers can be added here
+    volunteer_plan,
 )
 
 # Register blueprints
@@ -29,3 +29,4 @@ main_routes.register_blueprint(feedback_complaint.feedback_bp)
 main_routes.register_blueprint(customer_service.cs_bp)
 main_routes.register_blueprint(college_info.college_info_bp)
 main_routes.register_blueprint(college_student_source.college_source_bp)
+main_routes.register_blueprint(volunteer_plan.volunteer_bp)
