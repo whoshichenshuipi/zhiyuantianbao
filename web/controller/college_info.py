@@ -6,8 +6,6 @@ from web.decorator.permission import requires_roles, jwt_required
 college_info_bp = Blueprint('college_info', __name__, url_prefix='/api/college_info')
 
 @college_info_bp.route('/', methods=['GET'])
-@jwt_required
-@requires_roles('college')
 def list_college_info():
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('pageSize', 10, type=int)
@@ -16,8 +14,6 @@ def list_college_info():
     return jsonify({"code": 0, "msg": "成功", "data": {"rows": data, "total": pagination.total}})
 
 @college_info_bp.route('/<int:id>', methods=['GET'])
-@jwt_required
-@requires_roles('college')
 def get_college_info(id):
     info = CollegeInfo.query.get(id)
     if not info:

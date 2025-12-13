@@ -6,8 +6,6 @@ from web.decorator.permission import requires_roles, jwt_required
 community_bp = Blueprint('community_content', __name__, url_prefix='/api/community')
 
 @community_bp.route('/', methods=['GET'])
-@jwt_required
-@requires_roles('student')
 def list_community():
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('pageSize', 10, type=int)
@@ -16,8 +14,6 @@ def list_community():
     return jsonify({"code": 0, "msg": "成功", "data": {"rows": data, "total": pagination.total}})
 
 @community_bp.route('/<int:id>', methods=['GET'])
-@jwt_required
-@requires_roles('student')
 def get_community(id):
     item = CommunityContent.query.get(id)
     if not item:

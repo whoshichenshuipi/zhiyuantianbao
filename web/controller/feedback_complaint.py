@@ -6,8 +6,6 @@ from web.decorator.permission import requires_roles, jwt_required
 feedback_bp = Blueprint('feedback_complaint', __name__, url_prefix='/api/feedback')
 
 @feedback_bp.route('/', methods=['GET'])
-@jwt_required
-@requires_roles('student')
 def list_feedback():
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('pageSize', 10, type=int)
@@ -16,8 +14,6 @@ def list_feedback():
     return jsonify({"code": 0, "msg": "成功", "data": {"rows": data, "total": pagination.total}})
 
 @feedback_bp.route('/<int:id>', methods=['GET'])
-@jwt_required
-@requires_roles('student')
 def get_feedback(id):
     fb = FeedbackComplaint.query.get(id)
     if not fb:

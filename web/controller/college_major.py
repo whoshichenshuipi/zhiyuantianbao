@@ -6,8 +6,6 @@ from web.decorator.permission import requires_roles, jwt_required
 college_major_bp = Blueprint('college_major', __name__, url_prefix='/api/college_major')
 
 @college_major_bp.route('/', methods=['GET'])
-@jwt_required
-@requires_roles('student')
 def list_college_majors():
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('pageSize', 10, type=int)
@@ -17,8 +15,6 @@ def list_college_majors():
     return jsonify({"code": 0, "msg": "成功", "data": {"rows": data, "total": pagination.total}})
 
 @college_major_bp.route('/<int:id>', methods=['GET'])
-@jwt_required
-@requires_roles('student')
 def get_college_major(id):
     major = CollegeMajor.query.get(id)
     if not major:
